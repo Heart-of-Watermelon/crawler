@@ -3,5 +3,4 @@
 ## TODO
 
 ## CONTRIBUTORS
-
-Zhenyu-Yuan
+anorakj,Quan,Zhenyu_Yuan
