@@ -1,6 +1,27 @@
 # -*- coding: utf-8 -*-
 """Main entrance of the crawler."""
 
+from bs4 import BeautifulSoup
+import requests
+import re
+
+
+base_url = r'https://s.weibo.com/'
+url = r'https://s.weibo.com/top/summary'
+headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36'}
+all_links = []
+
+r = requests.get(url, headers = headers)
+print(r.text)
+soup = BeautifulSoup(r.text, features='lxml')
+all_iterms = soup.find_all('a', {'href' or 'hrdf_to': re.compile(r'^/weibo.')})
+for iterm in all_iterms:
+    all_links.append({iterm.get_text():base_url + iterm['href']})
+
+
+#len(all_links)  in principle there should be 51 iterms, however, one or two iterms has atrrbute "href_to" not "href"
+# for refreshing every minute, I think it does not matter
+
 
 def get_weibo_hot_search(num_required):
     """
@@ -12,6 +33,7 @@ def get_weibo_hot_search(num_required):
     Returns:
         html_content: the html content string crawled
     """
+    all_links = all_links[:num_required]
     return ''
 
 
