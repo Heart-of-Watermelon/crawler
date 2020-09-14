@@ -3,10 +3,11 @@
 
 import argparse
 import datetime
-import requests
-import warnings
-from bs4 import BeautifulSoup
 from typing import List, Dict
+from urllib import parse
+
+from bs4 import BeautifulSoup
+import requests
 
 
 def get_weibo_hot_search(num_required: int) -> List[Dict]:
@@ -22,21 +23,19 @@ def get_weibo_hot_search(num_required: int) -> List[Dict]:
     """
     weibo_url = 'https://s.weibo.com/top/summary/'
     r = requests.get(weibo_url)
-    # 向链接发送get请求获得页面
-    soup = BeautifulSoup(r.text, 'lxml')
+    soup = BeautifulSoup(r.text, features='html.parser')
+
+    url_and_title_results = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > a', limit=num_required)
+    hotness_results = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > span', limit=num_required)
+
+    if num_required > len(url_and_title_results):
+        print("热搜最大条数为:{}".format(len(url_and_title_results)))
 
     news = []
-    urls_titles = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > a')  # 链接及标题
-    hotness = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > span')   # 热度
-
-    if num_required > len(urls_titles):
-        warnings.warn("热搜最大条数为:", len(urls_titles))
-
-    for i in range(min(len(urls_titles), num_required)):
-        news_dict = dict()
-        news_dict['title'] = urls_titles[i + 1].get_text()
-        news_dict['url'] = "https://s.weibo.com" + urls_titles[i]['href']
-        news_dict['hotness'] = hotness[i].get_text()
+    for url_title, hotness in zip(url_and_title_results, hotness_results):
+        news_dict = {'title': url_title.get_text(),
+                     'url': parse.urljoin("https://s.weibo.com", url_title['href']),
+                     'hotness': hotness.get_text(), }
         news.append(news_dict)
 
     return news
@@ -47,21 +46,6 @@ def write_news2csv(news: List[Dict], store_path: str):
     f = open(store_path + '/热搜榜-%s.csv' % today, 'w', encoding='utf-8')
     for i in news:
         f.write(i['title'] + ',' + i['url'] + ',' + i['hotness'] + '\n')
-
-
-def parse_html(html_content, rule):
-    """
-    parse the html content according to rule
-
-    Args:
-        html_content: html content string crawled by the crawler
-        rule: rule string of xpath or css selector
-
-    Returns:
-        results: list of parsed result
-
-    """
-    pass
 
 
 if __name__ == '__main__':
