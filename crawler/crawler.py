@@ -25,7 +25,8 @@ def get_weibo_hot_search(num_required: int) -> List[Dict]:
     r = requests.get(weibo_url)
     soup = BeautifulSoup(r.text, features='html.parser')
 
-    url_and_title_results = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > a', limit=num_required)
+    url_and_title_results = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > a', limit=num_required + 1)
+    url_and_title_results = url_and_title_results[1:]  # 第一条置顶非热搜，无热度数据
     hotness_results = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > span', limit=num_required)
 
     if num_required > len(url_and_title_results):
