@@ -5,8 +5,7 @@
 
 #### Examples
 ```shell script
-cd crawler
-python crawler --num_required 50 --output_dir .
+python -m crawler.crawler 
 ```
 
 ## CONTRIBUTORS
