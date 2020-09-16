@@ -23,7 +23,7 @@ def get_weibo_hot_search(num_required: int) -> List[Dict]:
     """
     weibo_url = 'https://s.weibo.com/top/summary/'
     r = requests.get(weibo_url)
-    soup = BeautifulSoup(r.text, features='html.parser')
+    soup = BeautifulSoup(r.text, features='lxml')
 
     url_and_title_results = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > a', limit=num_required + 1)
     url_and_title_results = url_and_title_results[1:]  # 第一条置顶非热搜，无热度数据
