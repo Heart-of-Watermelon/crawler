@@ -49,13 +49,19 @@ def write_news2csv(news: List[Dict], store_path: str):
         f.write(i['title'] + ',' + i['url'] + ',' + i['hotness'] + '\n')
 
 
+def _check_positive(value):
+    int_value = int(value)
+    if int_value <= 0:
+        raise argparse.ArgumentTypeError("{} is an invalid positive int value".format(value))
+    return int_value
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num_required', type=int, required=True,
+    parser.add_argument('-n', '--num_required', type=_check_positive, default=50,
                         help='an int that specify the hot search number that user requires')
-    parser.add_argument('--output_dir', type=str, required=True,
+    parser.add_argument('-o', '--output_dir', type=str,  default='.',
                         help='Path to the directory to save the results')
-
     args = parser.parse_args()
 
     news = get_weibo_hot_search(args.num_required)
