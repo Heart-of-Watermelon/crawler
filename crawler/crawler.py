@@ -3,11 +3,13 @@
 
 import argparse
 import datetime
+import time
 from typing import List, Dict
 from urllib import parse
 
 from bs4 import BeautifulSoup
 import requests
+import schedule
 
 from crawler import constants
 
@@ -54,10 +56,17 @@ def parse_weibo_hot_search(response: requests.Response, num_required: int) -> Li
 
 
 def write_news2csv(news: List[Dict], store_path: str):
-    today = datetime.date.today()
-    f = open(store_path + '/热搜榜-%s.csv' % today, 'w', encoding='utf-8')
+    ts = int(time.time())
+    f = open(store_path + '/热搜榜-%s.csv' % ts, 'w', encoding='utf-8')
     for i in news:
         f.write(i['title'] + ',' + i['url'] + ',' + i['hotness'] + '\n')
+
+
+def hot_search_job():
+    response = request_weibo_hot_search()
+    news = parse_weibo_hot_search(response, args.num_required)
+    write_news2csv(news, args.output_dir)
+    print('finish hot search crawling on {}'.format(datetime.datetime.now()))
 
 
 def _check_positive(value):
@@ -75,6 +84,7 @@ if __name__ == '__main__':
                         help='Path to the directory to save the results')
     args = parser.parse_args()
 
-    response = request_weibo_hot_search()
-    news = parse_weibo_hot_search(response, args.num_required)
-    write_news2csv(news, args.output_dir)
+    schedule.every().minutes.do(hot_search_job)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
